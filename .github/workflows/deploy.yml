@@ -1,0 +1,37 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Build Docker image
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/lab8-app:latest .
+
+    - name: Push to Docker Hub
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/lab8-app:latest
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd ~/lab8-cicd
+          git pull
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/lab8-app:latest
+          docker stop app || true
+          docker rm app || true
+          docker run -d -p 3000:3000 --name app ${{ secrets.DOCKERHUB_USERNAME }}/lab8-app:latest
