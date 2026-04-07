@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/Norhankamal/lab8-cicd/issues"
   },
-  "homepage": "https://github.com/Norhankamal/lab8-cicd#readme"
+  "homepage": "https://github.com/Norhankamal/lab8-cicd#readme",
+  "dependencies": {
+    "mongoose": "^9.4.1"
+  }
 }
